@@ -1,0 +1,35 @@
+<launch>
+
+    <arg name="marker1Id"         default="0"/>
+    <arg name="marker2Id"         default="1"/>
+    <arg name="marker3Id"         default="26"/>
+    <arg name="marker4Id"         default="582"/>
+    <arg name="markerSize"        default="0.1"/>    <!-- in m -->
+    <arg name="eye"               default="left"/>
+    <arg name="dct_normalization" default="False" />
+    <arg name="dct_filter_size"   default="2" />
+    <arg name="marker1_frame"     default="marker_0" />
+    <arg name="marker2_frame"     default="marker_1" />
+    <arg name="marker3_frame"     default="marker_26" />
+    <arg name="marker4_frame"     default="marker_582" />
+
+
+    <node pkg="aruco_ros" type="double" name="aruco_double_cam2">    
+        <remap from="/camera_info" to="/cam_2/rgb/camera_info" />
+        <remap from="/image" to="/cam_2/rgb/image_rect_color" />
+        <param name="image_is_rectified" value="True"/>
+        <param name="marker_size" value="$(arg markerSize)"/>
+        <param name="marker_id1" value="$(arg marker1Id)"/>
+        <param name="marker_id2" value="$(arg marker2Id)"/>
+        <param name="marker_id3" value="$(arg marker3Id)"/>
+        <param name="marker_id4" value="$(arg marker4Id)"/>
+        <param name="normalizeImage" value="$(arg dct_normalization)"/>
+        <param name="dct_components_to_remove" value="$(arg dct_filter_size)"/>
+        <param name="parent_name" value="camera2_optical_frame"/>
+        <param name="child_name1" value="$(arg marker1_frame)" />
+        <param name="child_name2" value="$(arg marker2_frame)" />
+        <param name="child_name3" value="$(arg marker3_frame)" />
+        <param name="child_name4" value="$(arg marker4_frame)" />
+    </node>
+
+</launch>

@@ -48,6 +48,9 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <aruco_ros/ArucoThresholdConfig.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/aruco/dictionary.hpp>
+#include <opencv2/aruco.hpp>
 
 cv::Mat inImage;
 aruco::CameraParameters camParam;
@@ -59,15 +62,26 @@ ros::Subscriber cam_info_sub;
 bool cam_info_received;
 image_transport::Publisher image_pub;
 image_transport::Publisher debug_pub;
+
 ros::Publisher pose_pub1;
 ros::Publisher pose_pub2;
-std::string child_name1;
+ros::Publisher pose_pub3;
+ros::Publisher pose_pub4;
+
 std::string parent_name;
+std::string child_name1;
 std::string child_name2;
+std::string child_name3;
+std::string child_name4;
 
 double marker_size;
 int marker_id1;
 int marker_id2;
+int marker_id3;
+int marker_id4;
+
+cv::aruco::Board* arucoBoard = NULL;
+
 
 void image_callback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -95,29 +109,57 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
       // ok, let's detect
       mDetector.detect(inImage, markers, camParam, marker_size, false);
       // for each marker, draw info and its boundaries in the image
-      for (unsigned int i = 0; i < markers.size(); ++i)
-      {
-        // only publishing the selected marker
-        if (markers[i].id == marker_id1)
-        {
-          tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name1));
-          geometry_msgs::Pose poseMsg;
-          tf::poseTFToMsg(transform, poseMsg);
-          pose_pub1.publish(poseMsg);
-        }
-        else if (markers[i].id == marker_id2)
-        {
-          tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
-          geometry_msgs::Pose poseMsg;
-          tf::poseTFToMsg(transform, poseMsg);
-          pose_pub2.publish(poseMsg);
-        }
+      std::vector<int> markerIds;
+      std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+      cv::Ptr<cv::aruco::DetectorParameters> parameters = cv::aruco::DetectorParameters::create();
+      cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
+      cv::aruco::detectMarkers(inImage, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
+      cv::Vec3d rvec, tvec;
+      if(markerIds.size() > 0){
+        cv::aruco::estimatePoseBoard(markerCorners, markerIds, arucoBoard, camParam.CameraMatrix, camParam.Distorsion, rvec, tvec);
+        std::cout<< rvec << std::endl;
+        std::cout<< tvec << std::endl;
+
+      } 
+      // for (unsigned int i = 0; i < markers.size(); ++i)
+      // {
+      //   // only publishing the selected marker
+      //   if (markers[i].id == marker_id1)
+      //   {
+      //     tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+      //     br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name1));
+      //     geometry_msgs::Pose poseMsg;
+      //     tf::poseTFToMsg(transform, poseMsg);
+      //     pose_pub1.publish(poseMsg);
+      //   }
+      //   else if (markers[i].id == marker_id2)
+      //   {
+      //     tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+      //     br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
+      //     geometry_msgs::Pose poseMsg;
+      //     tf::poseTFToMsg(transform, poseMsg);
+      //     pose_pub2.publish(poseMsg);
+      //   }
+      //   else if (markers[i].id == marker_id3)
+      //   {
+      //     tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+      //     br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
+      //     geometry_msgs::Pose poseMsg;
+      //     tf::poseTFToMsg(transform, poseMsg);
+      //     pose_pub3.publish(poseMsg);
+      //   }
+      //   else if (markers[i].id == marker_id4)
+      //   {
+      //     tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+      //     br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
+      //     geometry_msgs::Pose poseMsg;
+      //     tf::poseTFToMsg(transform, poseMsg);
+      //     pose_pub4.publish(poseMsg);
+      //   }
 
         // but drawing all the detected markers
-        markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
-      }
+        // markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
+      // }
 
       // paint a circle in the center of the image
       cv::circle(inImage, cv::Point(inImage.cols / 2, inImage.rows / 2), 4, cv::Scalar(0, 255, 0), 1);
@@ -218,6 +260,7 @@ void reconf_callback(aruco_ros::ArucoThresholdConfig &config, std::uint32_t leve
 
 int main(int argc, char **argv)
 {
+
   ros::init(argc, argv, "aruco_simple");
   ros::NodeHandle nh("~");
   image_transport::ImageTransport it(nh);
@@ -235,15 +278,45 @@ int main(int argc, char **argv)
   image_transport::Subscriber image_sub = it.subscribe("/image", 1, &image_callback);
   cam_info_sub = nh.subscribe("/camera_info", 1, &cam_info_callback);
 
+  std::vector<std::vector<std::vector<double>>> mark_corners = {{{0.09,0.01,0.0},{0.09,0.09,0.}, {0.01,0.09,0.}, {0.01,0.01,0.}},
+  {{0.09,0.10,0.01}, {0.09,0.10,0.09},{0.01,0.10,0.09}, {0.01,0.10,0.01}},
+  {{0.09,0.0,0.09}, {0.09,0.0,0.01},{0.01,0.0,0.01}, {0.01,0.0,0.09}},
+  {{0.09,0.09,0.10},{0.09,0.01,0.10},{0.01,0.01,0.10},{0.01,0.09,0.10}}};
+  std::vector<std::vector<cv::Point3d>> cornerPoints(mark_corners.size());
+
+  for(int i = 0; i < mark_corners.size(); i++){
+    for(int j = 0; j<mark_corners[i].size(); j++){
+    cornerPoints[i].push_back(cv::Point3d(mark_corners[i][j][0], mark_corners[i][j][1], mark_corners[i][j][2]));
+    std::cout << cornerPoints[i] << std::endl;
+    }
+  }
+
+  // cv::InputArrayOfArrays board_corners({mark1_corners, mark2_corners, mark3_corners, mark4_corners});
+  cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
+  std::vector<int> ids_vec;
+  ids_vec.push_back(0);
+  ids_vec.push_back(1);
+  ids_vec.push_back(26);
+  ids_vec.push_back(582);
+  cv::InputArray ids(ids_vec);
+
+  arucoBoard = cv::aruco::Board::create(cornerPoints, dictionary, ids);
+
+
   cam_info_received = false;
   image_pub = it.advertise("result", 1);
   debug_pub = it.advertise("debug", 1);
   pose_pub1 = nh.advertise<geometry_msgs::Pose>("pose", 100);
   pose_pub2 = nh.advertise<geometry_msgs::Pose>("pose2", 100);
+  pose_pub3 = nh.advertise<geometry_msgs::Pose>("pose3", 100);
+  pose_pub4 = nh.advertise<geometry_msgs::Pose>("pose4", 100);
+
 
   nh.param<double>("marker_size", marker_size, 0.05);
   nh.param<int>("marker_id1", marker_id1, 582);
   nh.param<int>("marker_id2", marker_id2, 26);
+  nh.param<int>("marker_id3", marker_id3, 0);
+  nh.param<int>("marker_id4", marker_id4, 1);
   nh.param<bool>("normalizeImage", normalizeImageIllumination, true);
   nh.param<int>("dct_components_to_remove", dctComponentsToRemove, 2);
   if (dctComponentsToRemove == 0)
@@ -251,6 +324,9 @@ int main(int argc, char **argv)
   nh.param<std::string>("parent_name", parent_name, "");
   nh.param<std::string>("child_name1", child_name1, "");
   nh.param<std::string>("child_name2", child_name2, "");
+  nh.param<std::string>("child_name3", child_name1, "");
+  nh.param<std::string>("child_name4", child_name2, "");
+
 
   if (parent_name == "" || child_name1 == "" || child_name2 == "")
   {
