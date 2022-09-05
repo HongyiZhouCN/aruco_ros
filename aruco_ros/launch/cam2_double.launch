@@ -12,7 +12,10 @@
     <arg name="marker2_frame"     default="marker_1" />
     <arg name="marker3_frame"     default="marker_26" />
     <arg name="marker4_frame"     default="marker_582" />
-
+    <arg name="mark1_corners"     default="[[0.09,0.01,0.0],[0.09,0.09,0.],[0.01,0.09,0.],[0.01,0.01,0.]]"/>
+    <arg name="mark2_corners"     default="[[0.09,0.10,0.01],[0.09,0.10,0.09],[0.01,0.10,0.09],[0.01,0.10,0.01]]"/>
+    <arg name="mark3_corners"     default="[[0.09,0.0,0.09],[0.09,0.0,0.01],[0.01,0.0,0.01],[0.01,0.0,0.09]]"/>
+    <arg name="mark4_corners"     default="[[0.09,0.09,0.10],[0.09,0.01,0.10],[0.01,0.01,0.10],[0.01,0.09,0.10]]"/>
 
     <node pkg="aruco_ros" type="double" name="aruco_double_cam2">    
         <remap from="/camera_info" to="/cam_2/rgb/camera_info" />
@@ -23,9 +26,13 @@
         <param name="marker_id2" value="$(arg marker2Id)"/>
         <param name="marker_id3" value="$(arg marker3Id)"/>
         <param name="marker_id4" value="$(arg marker4Id)"/>
+        <param name="mark1_corners" value="$(arg mark1_corners)"/>
+        <param name="mark2_corners" value="$(arg mark2_corners)"/>
+        <param name="mark3_corners" value="$(arg mark3_corners)"/>
+        <param name="mark4_corners" value="$(arg mark4_corners)"/>
         <param name="normalizeImage" value="$(arg dct_normalization)"/>
         <param name="dct_components_to_remove" value="$(arg dct_filter_size)"/>
-        <param name="parent_name" value="camera2_optical_frame"/>
+        <param name="parent_name" value="camera1_optical_frame"/>
         <param name="child_name1" value="$(arg marker1_frame)" />
         <param name="child_name2" value="$(arg marker2_frame)" />
         <param name="child_name3" value="$(arg marker3_frame)" />
@@ -33,3 +40,4 @@
     </node>
 
 </launch>
+

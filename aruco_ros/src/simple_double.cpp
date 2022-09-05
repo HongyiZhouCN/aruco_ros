@@ -51,6 +51,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/aruco/dictionary.hpp>
 #include <opencv2/aruco.hpp>
+#include <opencv2/calib3d.hpp>
 
 cv::Mat inImage;
 aruco::CameraParameters camParam;
@@ -148,8 +149,16 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         int valid = cv::aruco::estimatePoseBoard(markerCorners, markerIds, arucoBoard, camParam.CameraMatrix, camParam.Distorsion, rvec, tvec);
         if (valid > 0){
           cv::aruco::drawAxis(inImage, camParam.CameraMatrix, camParam.Distorsion, rvec, tvec, 0.1);
-          ROS_INFO_STREAM("rvec: " << rvec << "\n");
-          ROS_INFO_STREAM("tvec: " << tvec << "\n");
+
+          cv::Mat rot_matrix;
+          cv::Rodrigues(rvec, rot_matrix);
+          tf::Matrix3x3 tf_rot(rot_matrix.at<double>(0,0),rot_matrix.at<double>(0,1),rot_matrix.at<double>(0,2),
+                                rot_matrix.at<double>(1,0),rot_matrix.at<double>(1,1),rot_matrix.at<double>(1,2),
+                                rot_matrix.at<double>(2,0),rot_matrix.at<double>(2,1),rot_matrix.at<double>(2,2));
+          tf::Vector3 tf_trans(tvec[0], tvec[1], tvec[2]);
+          tf::Transform transform = tf::Transform(tf_rot, tf_trans);
+
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp, "cam_1/rgb_camera_link", "aruco_board_cam1"));
         }
       } 
 
@@ -175,7 +184,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         else if (markers[i].id == marker_id3)
         {
           tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name3));
           geometry_msgs::Pose poseMsg;
           tf::poseTFToMsg(transform, poseMsg);
           pose_pub3.publish(poseMsg);
@@ -183,7 +192,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
         else if (markers[i].id == marker_id4)
         {
           tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name2));
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name4));
           geometry_msgs::Pose poseMsg;
           tf::poseTFToMsg(transform, poseMsg);
           pose_pub4.publish(poseMsg);
@@ -360,8 +369,8 @@ int main(int argc, char **argv)
   nh.param<std::string>("parent_name", parent_name, "");
   nh.param<std::string>("child_name1", child_name1, "");
   nh.param<std::string>("child_name2", child_name2, "");
-  nh.param<std::string>("child_name3", child_name1, "");
-  nh.param<std::string>("child_name4", child_name2, "");
+  nh.param<std::string>("child_name3", child_name3, "");
+  nh.param<std::string>("child_name4", child_name4, "");
 
 
   if (parent_name == "" || child_name1 == "" || child_name2 == "")

@@ -32,7 +32,7 @@
         <param name="mark4_corners" value="$(arg mark4_corners)"/>
         <param name="normalizeImage" value="$(arg dct_normalization)"/>
         <param name="dct_components_to_remove" value="$(arg dct_filter_size)"/>
-        <param name="parent_name" value="camera1_optical_frame"/>
+        <param name="parent_name" value="cam_1/rgb_camera_link"/>
         <param name="child_name1" value="$(arg marker1_frame)" />
         <param name="child_name2" value="$(arg marker2_frame)" />
         <param name="child_name3" value="$(arg marker3_frame)" />
