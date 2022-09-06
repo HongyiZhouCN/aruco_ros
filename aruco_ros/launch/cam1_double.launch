@@ -17,7 +17,7 @@
     <arg name="mark3_corners"     default="[[0.09,0.0,0.09],[0.09,0.0,0.01],[0.01,0.0,0.01],[0.01,0.0,0.09]]"/>
     <arg name="mark4_corners"     default="[[0.09,0.09,0.10],[0.09,0.01,0.10],[0.01,0.01,0.10],[0.01,0.09,0.10]]"/>
 
-    <node pkg="aruco_ros" type="double" name="aruco_double_cam1">    
+    <node pkg="aruco_ros" type="double" name="aruco_double_cam1" output="screen">    
         <remap from="/camera_info" to="/cam_1/rgb/camera_info" />
         <remap from="/image" to="/cam_1/rgb/image_rect_color" />
         <param name="image_is_rectified" value="True"/>

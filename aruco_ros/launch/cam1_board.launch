@@ -1,0 +1,50 @@
+<launch>
+
+    <!-- <arg name="marker1Id"         default="0"/>
+    <arg name="marker2Id"         default="1"/>
+    <arg name="marker3Id"         default="26"/>
+    <arg name="marker4Id"         default="582"/> -->
+    <arg name="markerSize"        default="0.1"/>    <!-- in m -->
+    <arg name="cameraID"          default="1"/>
+    <arg name="dct_normalization" default="False" />
+    <arg name="dct_filter_size"   default="2" />
+    <arg name="marker_frame"     default="marker_0" />
+
+    <node pkg="aruco_ros" type="board" name="aruco_board_cam1" output="screen">    
+        <remap from="/camera_info" to="/webcam/camera_info" />
+        <remap from="/image" to="/webcam/image_raw" />
+        <param name="image_is_rectified" value="True"/>
+        <rosparam param="marker_ids">
+        [582, 1, 26, 0]
+        </rosparam>
+        <rosparam param="marker1_corners"> 
+        [0.0, 0.114, 0.109,
+         0.0, 0.014, 0.109, 
+         0.0, 0.014, 0.009, 
+         0.0, 0.114, 0.009]
+        </rosparam>
+        <rosparam param="marker2_corners"> 
+        [0.114, 0.128, 0.109, 
+         0.014, 0.128, 0.109,
+         0.014, 0.128, 0.009,
+         0.114, 0.128, 0.009]
+        </rosparam>
+        <rosparam param="marker3_corners"> 
+        [0.128, 0.014, 0.109, 
+         0.128, 0.114, 0.109,
+         0.128, 0.114, 0.009, 
+         0.128, 0.014, 0.009]
+        </rosparam>
+        <rosparam param="marker4_corners"> 
+        [0.014, 0.0, 0.109,
+         0.114, 0.0, 0.109,
+         0.114, 0.0, 0.009,
+         0.014, 0.0, 0.009]
+        </rosparam>
+        <param name="normalizeImage" value="$(arg dct_normalization)"/>
+        <param name="dct_components_to_remove" value="$(arg dct_filter_size)"/>
+        <param name="parent_name" value="cam_1/rgb_camera_link"/>
+        <param name="child_name" value="$(arg marker_frame)" />
+    </node>
+
+</launch>

@@ -313,34 +313,6 @@ int main(int argc, char **argv)
 
   normalizeImageIllumination = false;
 
-  //  define an arucoboard
-  // std::vector<std::vector<std::vector<float>>> mark_corners = {{{0.09,0.01,0.0},{0.09,0.09,0.}, {0.01,0.09,0.}, {0.01,0.01,0.}},
-  // {{0.09,0.10,0.01}, {0.09,0.10,0.09},{0.01,0.10,0.09}, {0.01,0.10,0.01}},
-  // {{0.09,0.0,0.09}, {0.09,0.0,0.01},{0.01,0.0,0.01}, {0.01,0.0,0.09}},
-  // {{0.09,0.09,0.10},{0.09,0.01,0.10},{0.01,0.01,0.10},{0.01,0.09,0.10}}};
-  // std::vector<std::vector<cv::Point3f>> cornerPoints(mark_corners.size());
-
-  // for(int i = 0; i < mark_corners.size(); i++){
-  //   for(int j = 0; j<mark_corners[i].size(); j++){
-  //   cornerPoints[i].push_back(cv::Point3d(mark_corners[i][j][0], mark_corners[i][j][1], mark_corners[i][j][2]));
-  //   std::cout << cornerPoints[i] << std::endl;
-  //   }
-  // }
-
-  // // cv::InputArrayOfArrays board_corners({mark1_corners, mark2_corners, mark3_corners, mark4_corners});
-  // cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
-  // std::vector<int> ids_vec;
-  // ids_vec.push_back(0);
-  // ids_vec.push_back(1);
-  // ids_vec.push_back(26);
-  // ids_vec.push_back(582);
-  // cv::InputArray ids(ids_vec);
-
-  // arucoBoard = cv::aruco::Board::create(cornerPoints, dictionary, ids);
-
-  // std::cout << "board ids.size(): " << arucoBoard->ids.size() << std::endl;
-  // std::cout << "board objectpoints.size():" << arucoBoard->objPoints.size() << std::endl;
-
   nh.param<bool>("image_is_rectified", useRectifiedImages, true);
   ROS_INFO_STREAM("Image is rectified: " << useRectifiedImages);
 
