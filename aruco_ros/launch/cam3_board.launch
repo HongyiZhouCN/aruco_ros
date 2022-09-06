@@ -1,18 +1,14 @@
 <launch>
 
-    <!-- <arg name="marker1Id"         default="0"/>
-    <arg name="marker2Id"         default="1"/>
-    <arg name="marker3Id"         default="26"/>
-    <arg name="marker4Id"         default="582"/> -->
     <arg name="markerSize"        default="0.1"/>    <!-- in m -->
     <arg name="cameraID"          default="1"/>
     <arg name="dct_normalization" default="False" />
     <arg name="dct_filter_size"   default="2" />
     <arg name="marker_frame"     default="marker_0" />
 
-    <node pkg="aruco_ros" type="board" name="aruco_board_cam1" output="screen">    
-        <remap from="/camera_info" to="/cam_1/rgb/camera_info" />
-        <remap from="/image" to="/cam_1/rgb/image_rect_color" />
+    <node pkg="aruco_ros" type="board" name="aruco_board_cam3" output="screen">    
+        <remap from="/camera_info" to="/cam_3/rgb/camera_info" />
+        <remap from="/image" to="/cam_3/rgb/image_rect_color" />
         <!-- <remap from="/camera_info" to="/webcam/camera_info" /> -->
         <!-- <remap from="/image" to="/webcam/image_raw" /> -->
         <param name="image_is_rectified" value="True"/>
@@ -45,8 +41,8 @@
         </rosparam>
         <param name="normalizeImage" value="$(arg dct_normalization)"/>
         <param name="dct_components_to_remove" value="$(arg dct_filter_size)"/>
-        <param name="parent_name" value="cam_1/rgb_camera_link"/>
-        <param name="child_name" value="aruco_board_cam1" />
+        <param name="parent_name" value="cam_3/rgb_camera_link"/>
+        <param name="child_name" value="aruco_board_cam3" />
     </node>
 
 </launch>

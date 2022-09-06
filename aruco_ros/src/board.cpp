@@ -88,7 +88,7 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
           tf::Vector3 tf_trans(tvec[0], tvec[1], tvec[2]);
           tf::Transform transform = tf::Transform(tf_rot, tf_trans);
 
-          br.sendTransform(tf::StampedTransform(transform, curr_stamp, "cam_1/rgb_camera_link", "aruco_board_cam1"));
+          br.sendTransform(tf::StampedTransform(transform, curr_stamp, parent_name, child_name));
         }
       } 
 
